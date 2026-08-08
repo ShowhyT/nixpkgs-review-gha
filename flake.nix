@@ -57,20 +57,25 @@
         }
       );
 
-      checks = eachSystem (pkgs: {
-        inherit (pkgs) nixpkgs-review;
-        inherit (self.packages.${pkgs.stdenv.hostPlatform.system}.nrgha-api) clippy;
-        packages = pkgs.linkFarm "packages" self.packages.${pkgs.stdenv.hostPlatform.system};
-        fmt = pkgs.runCommand "fmt-check" { } ''
-          cp -r --no-preserve=mode ${self} repo
-          ${lib.getExe self.formatter.${pkgs.stdenv.hostPlatform.system}} -C repo --ci
-          touch $out
-        '';
-        nu = pkgs.runCommand "nu-check" { } ''
-          ${lib.getExe pkgs.nushell} -c 'for x in (glob ${self}/**/*.nu) { print $"checking ($x)"; nu-check $x -d }'
-          touch $out
-        '';
-      });
+      checks = eachSystem (
+        pkgs:
+        {
+          inherit (self.packages.${pkgs.stdenv.hostPlatform.system}.nrgha-api) clippy;
+          packages = pkgs.linkFarm "packages" self.packages.${pkgs.stdenv.hostPlatform.system};
+          fmt = pkgs.runCommand "fmt-check" { } ''
+            cp -r --no-preserve=mode ${self} repo
+            ${lib.getExe self.formatter.${pkgs.stdenv.hostPlatform.system}} -C repo --ci
+            touch $out
+          '';
+          nu = pkgs.runCommand "nu-check" { } ''
+            ${lib.getExe pkgs.nushell} -c 'for x in (glob ${self}/**/*.nu) { print $"checking ($x)"; nu-check $x -d }'
+            touch $out
+          '';
+        }
+        // lib.optionalAttrs (pkgs.stdenv.hostPlatform.system != "aarch64-linux") {
+          inherit (pkgs) nixpkgs-review;
+        }
+      );
     };
 
   nixConfig = {
