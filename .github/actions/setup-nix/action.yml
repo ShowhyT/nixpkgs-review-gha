@@ -23,38 +23,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: reclaim space (linux)
-      if: runner.os == 'Linux' && inputs.system != 'riscv64-linux'
-      uses: wimpysworld/nothing-but-nix@main
-      with:
-        hatchet-protocol: rampage
-
-    - name: reclaim space (darwin)
-      if: runner.os == 'macOS'
-      shell: bash
-      run: |
-        echo "::group::disk space (before)"
-        sudo df -h
-        echo "::endgroup::"
-
-        echo "::group::disable mds"
-        sudo mdutil -i off -a || echo "mdutil failed"
-        sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.metadata.mds.plist \
-         || echo "launchctl unload failed"
-        echo "::endgroup::"
-
-        echo "Background space expansion started. /nix will grow as space becomes available."
-        sudo rm -rf \
-          /Applications/Xcode_* \
-          /Library/Developer/CoreSimulator \
-          /Library/Frameworks \
-          /Users/runner/.dotnet \
-          /Users/runner/.rustup \
-          /Users/runner/Library/Android \
-          /Users/runner/Library/Caches \
-          /Users/runner/Library/Developer/CoreSimulator \
-          /Users/runner/hostedtoolcache &
-
     - name: prepare remote builder config
       if: ${{ inputs.builders != '' && inputs.ssh-key != '' }}
       env:
