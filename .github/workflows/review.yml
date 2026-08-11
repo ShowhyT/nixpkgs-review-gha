@@ -86,7 +86,7 @@ on:
 
 jobs:
   prepare:
-    runs-on: ubuntu-latest
+    runs-on: namespace-profile-nixpkgs-review
     outputs:
       pr: ${{ steps.prepare.outputs.pr }}
 
