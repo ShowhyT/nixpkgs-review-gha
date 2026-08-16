@@ -24,6 +24,7 @@ gha group "install packages" {
 }
 
 gha group $"run nixpkgs-review ($inputs.extra-args-raw)" {
+  export NIXPKGS_ALLOW_UNFREE=1
   cd nixpkgs
   nixpkgs-review -- pr $inputs.pr ...[
     --no-shell
